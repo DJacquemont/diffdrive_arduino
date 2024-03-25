@@ -196,6 +196,29 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_deactivate(
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
+// hardware_interface::return_type DiffDriveArduinoHardware::read(
+//   const rclcpp::Time & /*time*/, const rclcpp::Duration & period)
+// {
+//   if (!comms_.connected())
+//   {
+//     return hardware_interface::return_type::ERROR;
+//   }
+
+//   comms_.read_encoder_values(wheel_l_.enc, wheel_r_.enc);
+
+//   double delta_seconds = period.seconds();
+
+//   double pos_prev = wheel_l_.pos;
+//   wheel_l_.pos = wheel_l_.calc_enc_angle();
+//   wheel_l_.vel = (wheel_l_.pos - pos_prev) / delta_seconds;
+
+//   pos_prev = wheel_r_.pos;
+//   wheel_r_.pos = wheel_r_.calc_enc_angle();
+//   wheel_r_.vel = (wheel_r_.pos - pos_prev) / delta_seconds;
+
+//   return hardware_interface::return_type::OK;
+// }
+
 hardware_interface::return_type DiffDriveArduinoHardware::read(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & period)
 {
@@ -204,17 +227,11 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
     return hardware_interface::return_type::ERROR;
   }
 
-  comms_.read_encoder_values(wheel_l_.enc, wheel_r_.enc);
+  comms_.read_rpm_values(wheel_l_.vel, wheel_r_.vel);
 
   double delta_seconds = period.seconds();
-
-  double pos_prev = wheel_l_.pos;
-  wheel_l_.pos = wheel_l_.calc_enc_angle();
-  wheel_l_.vel = (wheel_l_.pos - pos_prev) / delta_seconds;
-
-  pos_prev = wheel_r_.pos;
-  wheel_r_.pos = wheel_r_.calc_enc_angle();
-  wheel_r_.vel = (wheel_r_.pos - pos_prev) / delta_seconds;
+  wheel_l_.pos = wheel_l_.vel*delta_seconds + wheel_l_.pos;
+  wheel_r_.pos = wheel_r_.vel*delta_seconds + wheel_r_.pos;
 
   return hardware_interface::return_type::OK;
 }
