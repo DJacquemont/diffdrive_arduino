@@ -6,6 +6,7 @@
 // #include <cstdlib>
 #include <libserial/SerialPort.h>
 #include <iostream>
+#include <cmath>
 
 
 LibSerial::BaudRate convert_baud_rate(int baud_rate)
@@ -106,13 +107,16 @@ public:
     std::string token_1 = response.substr(0, del_pos);
     std::string token_2 = response.substr(del_pos + delimiter.length());
 
-    val_1 = std::atoi(token_1.c_str())/60.0;
-    val_2 = std::atoi(token_2.c_str())/60.0;
+    // Reading speed values of the wheels in radians per second
+    val_1 = std::stod(token_1.c_str())*(2*M_PI)/(60.0*60.0);
+    val_2 = std::stod(token_2.c_str())*(2*M_PI)/(60.0*60.0);
   }
 
   void set_motor_values(int val_1, int val_2)
   {
     std::stringstream ss;
+    // Sending speed values of the wheels in rpm
+
     ss << "o " << val_1 << " " << val_2 << "\r";
     send_msg(ss.str());
   }

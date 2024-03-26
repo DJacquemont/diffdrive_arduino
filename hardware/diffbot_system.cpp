@@ -230,8 +230,12 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
   comms_.read_rpm_values(wheel_l_.vel, wheel_r_.vel);
 
   double delta_seconds = period.seconds();
+  
   wheel_l_.pos = wheel_l_.vel*delta_seconds + wheel_l_.pos;
   wheel_r_.pos = wheel_r_.vel*delta_seconds + wheel_r_.pos;
+
+  RCLCPP_INFO(
+    rclcpp::get_logger("DiffDriveArduinoHardware"), "Read motor values: %f %f", wheel_l_.vel, wheel_r_.vel);
 
   return hardware_interface::return_type::OK;
 }
@@ -244,9 +248,17 @@ hardware_interface::return_type diffdrive_arduino ::DiffDriveArduinoHardware::wr
     return hardware_interface::return_type::ERROR;
   }
 
-  int motor_l_counts_per_loop = wheel_l_.cmd / wheel_l_.rads_per_count / cfg_.loop_rate;
-  int motor_r_counts_per_loop = wheel_r_.cmd / wheel_r_.rads_per_count / cfg_.loop_rate;
-  comms_.set_motor_values(motor_l_counts_per_loop, motor_r_counts_per_loop);
+  RCLCPP_INFO(
+    rclcpp::get_logger("DiffDriveArduinoHardware"), "Sent motor values: %f %f", wheel_l_.cmd, wheel_r_.cmd);
+
+  wheel_l_.cmd = wheel_l_.cmd*60.0*60.0/(2*M_PI);
+  wheel_r_.cmd = wheel_r_.cmd*60.0*60.0/(2*M_PI);
+
+  RCLCPP_INFO(
+    rclcpp::get_logger("DiffDriveArduinoHardware"), "Sent motor values: %f %f", wheel_l_.cmd, wheel_r_.cmd);
+
+  comms_.set_motor_values(wheel_l_.cmd, wheel_r_.cmd);
+
   return hardware_interface::return_type::OK;
 }
 
