@@ -121,6 +121,15 @@ public:
     send_msg(ss.str());
   }
 
+  void set_servo_values()
+  {
+    std::stringstream ss;
+    // Sending command to the servo 
+
+    ss << "s" << "\r";
+    send_msg(ss.str());
+  }
+
   void set_pid_values(int k_p, int k_d, int k_i, int k_o)
   {
     std::stringstream ss;
