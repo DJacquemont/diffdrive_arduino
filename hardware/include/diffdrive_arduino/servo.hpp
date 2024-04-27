@@ -8,7 +8,9 @@ class Servo
     public:
 
     std::string name = "";
-    bool cmd = false;
+    double cmd = 0;
+    double pos = 0;
+    double vel = 0;
 
     Servo() = default;
 
@@ -20,6 +22,11 @@ class Servo
     void setup(const std::string &servo_name)
     {
       name = servo_name;
+    }
+
+    void reset()
+    {
+      cmd = 0;
     }
 };
 
