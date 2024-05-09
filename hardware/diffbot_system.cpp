@@ -266,9 +266,6 @@ hardware_interface::return_type diffdrive_arduino ::DiffDriveArduinoHardware::wr
 
   comms_.set_motor_values(wheel_l_.cmd, wheel_r_.cmd);
 
-  RCLCPP_INFO(
-    rclcpp::get_logger("DiffDriveArduinoHardware"), "Ssevo_.cmd: %f", servo_.cmd);
-
   if (servo_.cmd){
     comms_.set_servo_values();
     servo_.cmd =0.0;
