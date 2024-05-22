@@ -107,9 +107,61 @@ public:
     std::string token_1 = response.substr(0, del_pos);
     std::string token_2 = response.substr(del_pos + delimiter.length());
 
-    // Reading speed values of the wheels in radians per second
-    val_1 = std::stod(token_1.c_str())*(2*M_PI)/(60.0*60.0);
-    val_2 = std::stod(token_2.c_str())*(2*M_PI)/(60.0*60.0);
+    val_1 = 0.0;
+    val_2 = 0.0;
+
+    if (!token_1.empty() && !token_2.empty())
+    {
+        try
+        {
+            val_1 = std::stod(token_1.c_str()) * (2 * M_PI) / (60.0 * 60.0);
+            val_2 = std::stod(token_2.c_str())*(2*M_PI)/(60.0*60.0);
+        }
+        catch (const std::invalid_argument& e)
+        {
+            std::cerr << "Invalid argument for token_1: " << token_1 << std::endl;
+        }
+    }
+  }
+
+  void read_system_values(double &val_1, double &val_2, double &val_3, double &val_4)
+  {
+    std::string response = send_msg("b\r");
+
+    std::string delimiter = " ";
+    size_t del_pos = response.find(delimiter);
+    std::string token_1 = response.substr(0, del_pos);
+    response = response.substr(del_pos + delimiter.length());
+
+    del_pos = response.find(delimiter);
+    std::string token_2 = response.substr(0, del_pos);
+    response = response.substr(del_pos + delimiter.length());
+
+    del_pos = response.find(delimiter);
+    std::string token_3 = response.substr(0, del_pos);
+    response = response.substr(del_pos + delimiter.length());
+
+    std::string token_4 = response;
+
+    val_1 = 0.0;
+    val_2 = 0.0;
+    val_3 = 0.0;
+    val_4 = 0.0;
+
+    if (!token_1.empty() && !token_2.empty() && !token_3.empty() && !token_4.empty())
+    {
+        try
+        {
+            val_1 = std::stod(token_1.c_str())*(2*M_PI)/(60.0*60.0);
+            val_2 = std::stod(token_2.c_str())*(2*M_PI)/(60.0*60.0);
+            val_3 = std::stod(token_3.c_str());
+            val_4 = std::stod(token_4.c_str());
+        }
+        catch (const std::invalid_argument& e)
+        {
+            std::cerr << "Invalid argument for token_1: " << token_1 << std::endl;
+        }
+    }    
   }
 
   void set_motor_values(int val_1, int val_2)
@@ -121,12 +173,12 @@ public:
     send_msg(ss.str());
   }
 
-  void set_servo_values()
+  void set_servo_values(int val)
   {
     std::stringstream ss;
     // Sending command to the servo 
 
-    ss << "s" << "\r";
+    ss << "s " + std::to_string(val) + "\r";
     send_msg(ss.str());
   }
 

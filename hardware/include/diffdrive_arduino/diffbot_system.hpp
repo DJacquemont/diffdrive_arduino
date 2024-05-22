@@ -102,6 +102,7 @@ private:
   Wheel wheel_l_;
   Wheel wheel_r_;
   Servo servo_;
+  std::vector<double> hw_sensor_states_;
 };
 
 }  // namespace diffdrive_arduino

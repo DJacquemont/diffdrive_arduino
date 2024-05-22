@@ -56,6 +56,8 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_init(
     RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "PID values not supplied, using defaults.");
   }
 
+  hw_sensor_states_.resize(
+    info_.sensors[0].state_interfaces.size(), std::numeric_limits<double>::quiet_NaN());
 
   wheel_l_.setup(cfg_.left_wheel_name, cfg_.enc_counts_per_rev);
   wheel_r_.setup(cfg_.right_wheel_name, cfg_.enc_counts_per_rev);
@@ -133,6 +135,12 @@ std::vector<hardware_interface::StateInterface> DiffDriveArduinoHardware::export
   state_interfaces.emplace_back(hardware_interface::StateInterface(
     servo_.name, hardware_interface::HW_IF_VELOCITY, &servo_.vel));
 
+  for (uint i = 0; i < info_.sensors[0].state_interfaces.size(); i++)
+  {
+    state_interfaces.emplace_back(hardware_interface::StateInterface(
+      info_.sensors[0].name, info_.sensors[0].state_interfaces[i].name, &hw_sensor_states_[i]));
+  }
+
   return state_interfaces;
 }
 
@@ -192,6 +200,12 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_activate(
   {
     comms_.set_pid_values(cfg_.pid_p,cfg_.pid_d,cfg_.pid_i,cfg_.pid_o);
   }
+
+  if (std::isnan(hw_sensor_states_[0]))
+  {
+    hw_sensor_states_[0] = 0;
+  }
+
   RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "Successfully activated!");
 
   return hardware_interface::CallbackReturn::SUCCESS;
@@ -206,29 +220,6 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_deactivate(
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-// hardware_interface::return_type DiffDriveArduinoHardware::read(
-//   const rclcpp::Time & /*time*/, const rclcpp::Duration & period)
-// {
-//   if (!comms_.connected())
-//   {
-//     return hardware_interface::return_type::ERROR;
-//   }
-
-//   comms_.read_encoder_values(wheel_l_.enc, wheel_r_.enc);
-
-//   double delta_seconds = period.seconds();
-
-//   double pos_prev = wheel_l_.pos;
-//   wheel_l_.pos = wheel_l_.calc_enc_angle();
-//   wheel_l_.vel = (wheel_l_.pos - pos_prev) / delta_seconds;
-
-//   pos_prev = wheel_r_.pos;
-//   wheel_r_.pos = wheel_r_.calc_enc_angle();
-//   wheel_r_.vel = (wheel_r_.pos - pos_prev) / delta_seconds;
-
-//   return hardware_interface::return_type::OK;
-// }
-
 hardware_interface::return_type DiffDriveArduinoHardware::read(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & period)
 {
@@ -236,13 +227,17 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
   {
     return hardware_interface::return_type::ERROR;
   }
+  double battery_level = 0.0;
+  double duplo_cnt = 0.0;
 
-  comms_.read_rpm_values(wheel_l_.vel, wheel_r_.vel);
+  comms_.read_system_values(wheel_l_.pos, wheel_r_.pos, battery_level, duplo_cnt);
 
   double delta_seconds = period.seconds();
   
   wheel_l_.pos = wheel_l_.vel*delta_seconds + wheel_l_.pos;
   wheel_r_.pos = wheel_r_.vel*delta_seconds + wheel_r_.pos;
+  hw_sensor_states_[0] = static_cast<float>(battery_level);
+  hw_sensor_states_[1] = static_cast<float>(duplo_cnt);
 
   RCLCPP_DEBUG(
     rclcpp::get_logger("DiffDriveArduinoHardware"), "Read motor values: %f %f", wheel_l_.vel, wheel_r_.vel);
@@ -266,10 +261,7 @@ hardware_interface::return_type diffdrive_arduino ::DiffDriveArduinoHardware::wr
 
   comms_.set_motor_values(wheel_l_.cmd, wheel_r_.cmd);
 
-  if (servo_.cmd){
-    comms_.set_servo_values();
-    servo_.cmd =0.0;
-  }
+  comms_.set_servo_values(servo_.cmd);
 
   return hardware_interface::return_type::OK;
 }
