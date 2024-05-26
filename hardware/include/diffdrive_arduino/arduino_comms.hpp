@@ -107,21 +107,9 @@ public:
     std::string token_1 = response.substr(0, del_pos);
     std::string token_2 = response.substr(del_pos + delimiter.length());
 
-    val_1 = 0.0;
-    val_2 = 0.0;
-
-    if (!token_1.empty() && !token_2.empty())
-    {
-        try
-        {
-            val_1 = std::stod(token_1.c_str()) * (2 * M_PI) / (60.0 * 60.0);
-            val_2 = std::stod(token_2.c_str())*(2*M_PI)/(60.0*60.0);
-        }
-        catch (const std::invalid_argument& e)
-        {
-            std::cerr << "Invalid argument for token_1: " << token_1 << std::endl;
-        }
-    }
+    // Reading speed values of the wheels in radians per second
+    val_1 = std::stod(token_1.c_str())*(2*M_PI)/(60.0*60.0);
+    val_2 = std::stod(token_2.c_str())*(2*M_PI)/(60.0*60.0);
   }
 
   void read_system_values(double &val_1, double &val_2, double &val_3, double &val_4)
