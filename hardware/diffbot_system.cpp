@@ -227,24 +227,24 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
   {
     return hardware_interface::return_type::ERROR;
   }
-  // double battery_level = 0.0;
-  // double duplo_cnt = 0.0;
+  double battery_level = 0.0;
+  double duplo_cnt = 0.0;
 
-  // comms_.read_system_values(wheel_l_.vel, wheel_r_.vel, battery_level, duplo_cnt);
-
-  // double delta_seconds = period.seconds();
-  
-  // wheel_l_.pos = wheel_l_.vel*delta_seconds + wheel_l_.pos;
-  // wheel_r_.pos = wheel_r_.vel*delta_seconds + wheel_r_.pos;
-  // hw_sensor_states_[0] = static_cast<float>(battery_level);
-  // hw_sensor_states_[1] = static_cast<float>(duplo_cnt);
-
-  comms_.read_rpm_values(wheel_l_.vel, wheel_r_.vel);
+  comms_.read_system_values(wheel_l_.vel, wheel_r_.vel, battery_level, duplo_cnt);
 
   double delta_seconds = period.seconds();
   
   wheel_l_.pos = wheel_l_.vel*delta_seconds + wheel_l_.pos;
   wheel_r_.pos = wheel_r_.vel*delta_seconds + wheel_r_.pos;
+  hw_sensor_states_[0] = static_cast<float>(battery_level);
+  hw_sensor_states_[1] = static_cast<float>(duplo_cnt);
+
+  // comms_.read_rpm_values(wheel_l_.vel, wheel_r_.vel);
+
+  // double delta_seconds = period.seconds();
+  
+  // wheel_l_.pos = wheel_l_.vel*delta_seconds + wheel_l_.pos;
+  // wheel_r_.pos = wheel_r_.vel*delta_seconds + wheel_r_.pos;
 
   RCLCPP_DEBUG(
     rclcpp::get_logger("DiffDriveArduinoHardware"), "Read motor values: %f %f", wheel_l_.vel, wheel_r_.vel);

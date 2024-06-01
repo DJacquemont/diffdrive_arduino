@@ -136,20 +136,25 @@ public:
     val_3 = 0.0;
     val_4 = 0.0;
 
-    if (!token_1.empty() && !token_2.empty() && !token_3.empty() && !token_4.empty())
-    {
-        try
-        {
-            val_1 = std::stod(token_1.c_str())*(2*M_PI)/(60.0*60.0);
-            val_2 = std::stod(token_2.c_str())*(2*M_PI)/(60.0*60.0);
-            val_3 = std::stod(token_3.c_str());
-            val_4 = std::stod(token_4.c_str());
-        }
-        catch (const std::invalid_argument& e)
-        {
-            std::cerr << "Invalid argument for token_1: " << token_1 << std::endl;
-        }
-    }    
+    val_1 = std::stod(token_1.c_str())*(2*M_PI)/(60.0*60.0);
+    val_2 = std::stod(token_2.c_str())*(2*M_PI)/(60.0*60.0);
+    val_3 = std::stod(token_3.c_str());
+    val_4 = std::stod(token_4.c_str());
+
+    // if (!token_1.empty() && !token_2.empty() && !token_3.empty() && !token_4.empty())
+    // {
+    //     try
+    //     {
+    //         val_1 = std::stod(token_1.c_str())*(2*M_PI)/(60.0*60.0);
+    //         val_2 = std::stod(token_2.c_str())*(2*M_PI)/(60.0*60.0);
+    //         val_3 = std::stod(token_3.c_str());
+    //         val_4 = std::stod(token_4.c_str());
+    //     }
+    //     catch (const std::invalid_argument& e)
+    //     {
+    //         std::cerr << "Invalid argument for token_1: " << token_1 << std::endl;
+    //     }
+    // }    
   }
 
   void set_motor_values(int val_1, int val_2)
